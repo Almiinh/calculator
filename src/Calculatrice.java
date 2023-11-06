@@ -6,18 +6,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Objects;
 
-class Label extends JLabel {
-    public Label(String text, int horizontalAlignment) {
-        super(text, horizontalAlignment);
-    }
-
-    public void setText(String text) {
-        if (text.contains("Infinity"))
-            text = text.replace("Infinity", "±∞");
-        super.setText(text);
-    }
-}
-
 public class Calculatrice extends JFrame implements ActionListener, KeyListener {
     private Label label, miniLabel;
     private String numberA = "0", numberB = "", operator = "";
@@ -26,6 +14,12 @@ public class Calculatrice extends JFrame implements ActionListener, KeyListener 
 
     public Calculatrice() {
         super("Calculatrice");
+    }
+
+    public static void main(String[] args) {
+        // Schedule a job for the event-dispatching thread:
+        // creating and showing this application's GUI.
+        javax.swing.SwingUtilities.invokeLater(Calculatrice::createAndShowGUI);
     }
 
     /**
@@ -50,18 +44,12 @@ public class Calculatrice extends JFrame implements ActionListener, KeyListener 
         frame.addComponentsToPane();
 
         //Display the window.
-        frame.setMinimumSize(new Dimension(280, 400));
+        frame.setMinimumSize(new Dimension(300, 400));
         frame.setSize(330, 520);
         frame.setVisible(true);
         frame.buttonEqual.setFocusable(true);
         frame.buttonEqual.setFocusPainted(false);
         frame.buttonEqual.requestFocus();
-    }
-
-    public static void main(String[] args) {
-        // Schedule a job for the event-dispatching thread:
-        // creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(Calculatrice::createAndShowGUI);
     }
 
     private String compute() {
@@ -74,8 +62,7 @@ public class Calculatrice extends JFrame implements ActionListener, KeyListener 
             case "÷" -> a /= b;
         }
         numberA = Double.toString(a);
-        if (numberA.endsWith(".0"))
-            numberA = numberA.substring(0, numberA.length() - 2);
+        if (numberA.endsWith(".0")) numberA = numberA.substring(0, numberA.length() - 2);
         label.setText(numberA);
         return numberA;
     }
@@ -86,8 +73,7 @@ public class Calculatrice extends JFrame implements ActionListener, KeyListener 
     private void actionOnNumber(String s) {
         String number = fillNumberA ? numberA : numberB;
         if (s.equals("."))                              // Case: Number cannot start by '.'
-            if (number.contains("."))
-                return;
+            if (number.contains(".")) return;
         if (number.equals("0") && !s.equals(".") || afterEqual)         // Case: Remove useless 0 on the left
             number = "";                                                // Case: After '=' is pressed
         if (afterEqual) {
@@ -118,7 +104,7 @@ public class Calculatrice extends JFrame implements ActionListener, KeyListener 
         if (fillNumberA) {
             fillNumberA = false;
             numberB = "";
-        } else if (!(numberB.equals("") || numberB.equals("-"))) {
+        } else if (!(numberB.isEmpty() || numberB.equals("-"))) {
             numberA = compute();
             numberB = "";
         }
@@ -138,18 +124,17 @@ public class Calculatrice extends JFrame implements ActionListener, KeyListener 
         if (!fillNumberA) {
             numberA = compute();
             afterEqual = true;
-        } else
-            miniLabel.setText(numberA + "=");
+        } else miniLabel.setText(numberA + "=");
     }
 
     private void actionOnBackspace() {
-        if (fillNumberA && !numberA.equals("")) {
+        if (fillNumberA && !numberA.isEmpty()) {
             numberA = numberA.substring(0, numberA.length() - 1);
-            if (numberA.equals("") || numberA.equals("-")) {        // Case: Clear on left
+            if (numberA.isEmpty() || numberA.equals("-")) {        // Case: Clear on left
                 numberA = "0";
             }
             label.setText(numberA);
-        } else if (numberB.equals("") || numberB.equals("-")) {        // Case: Clear numberB
+        } else if (numberB.isEmpty() || numberB.equals("-")) {        // Case: Clear numberB
             label.setText(numberA);
             fillNumberA = true;
             operator = "";
@@ -161,13 +146,11 @@ public class Calculatrice extends JFrame implements ActionListener, KeyListener 
 
     private void actionOnSign() {
         if (fillNumberA && !numberA.equals("0") || afterEqual) {
-            if (numberA.startsWith("-"))
-                numberA = numberA.substring(1);
+            if (numberA.startsWith("-")) numberA = numberA.substring(1);
             else numberA = "-" + numberA;
             label.setText(numberA);
         } else if (!fillNumberA && !numberB.equals("0")) {
-            if (numberB.startsWith("-"))
-                numberB = numberB.substring(1);
+            if (numberB.startsWith("-")) numberB = numberB.substring(1);
             else numberB = "-" + numberB;
             label.setText(numberA + operator + numberB);
         }
@@ -197,9 +180,7 @@ public class Calculatrice extends JFrame implements ActionListener, KeyListener 
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
-        System.out.println(e.getKeyChar());
-        if (0x60 <= key && key <= 0x69)
-            actionOnNumber(Integer.toString(key - 0x60));
+        if (0x60 <= key && key <= 0x69) actionOnNumber(Integer.toString(key - 0x60));
         switch (key) {
             case KeyEvent.VK_DECIMAL -> actionOnNumber(".");
             case KeyEvent.VK_ADD -> actionOnOperator("+");
@@ -221,12 +202,12 @@ public class Calculatrice extends JFrame implements ActionListener, KeyListener 
         c.weighty = 1;
         c.gridx = j;
         c.gridy = i;
-        button.setFont(new Font("Segoe UI Variable", Font.PLAIN, 24));
+        button.setFont(new Font("Segoe UI Variable", Font.PLAIN, 20));
+
         button.addActionListener(this);
         button.addKeyListener(this);
         button.setFocusable(false);
-        if (color != null)
-            button.setForeground(color);
+        if (color != null) button.setForeground(color);
         getContentPane().add(button, c);
         return button;
     }
@@ -261,18 +242,19 @@ public class Calculatrice extends JFrame implements ActionListener, KeyListener 
         createButton("0", firstRow + 4, 0, c);
 
         // Adding labels
-        label = new Label("0", SwingConstants.RIGHT);
+        label = new Label("0", SwingConstants.RIGHT, true);
         label.setVerticalAlignment(SwingConstants.CENTER);
+        label.setMinimumSize(new Dimension(280, 60));
         label.setFont(new Font("Segoe UI Variable", Font.BOLD, 42));
         c.gridwidth = GridBagConstraints.REMAINDER;
-        c.insets = new Insets(0, 10, 10, 10);
+        c.insets = new Insets(0, 0, 10, 10);
         c.ipady = -20;
         c.ipadx = 0;
         c.gridx = 0;
         c.gridy = 1;
         pane.add(label, c);
 
-        miniLabel = new Label(" ", SwingConstants.RIGHT);
+        miniLabel = new Label(" ", SwingConstants.RIGHT, false);
         miniLabel.setVerticalAlignment(SwingConstants.BOTTOM);
         miniLabel.setFont(new Font("Segoe UI Variable", Font.PLAIN, 12));
         miniLabel.setForeground(Color.DARK_GRAY);
