@@ -1,3 +1,5 @@
+package calculatrice;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -39,7 +41,7 @@ public class Label extends JLabel {
         Font currentFont = getFont();
         int textWidth = g.getFontMetrics(currentFont).stringWidth(text);
         int fontSize = currentFont.getSize();
-        float scale = (float) (getWidth() - 10) / (float) textWidth;
+        float scale = (float) (getWidth() - 10) / textWidth;
         fontSize = (int) (fontSize * scale);
 
         // Ensure font size stays within defined limits
